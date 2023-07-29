@@ -2,6 +2,7 @@
 
 namespace ShibuyaKosuke\LaravelValuedomainApi\Providers;
 
+use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider as ServiceProviderBase;
 use ShibuyaKosuke\LaravelValuedomainApi\ValueDomain;
 
@@ -21,8 +22,8 @@ class ServiceProvider extends ServiceProviderBase
 
         $this->mergeConfigFrom(__DIR__ . '/../../config/valuedomain.php', self::KEY);
 
-        $this->app->bind($this::class, function ($app) {
-            return new ValueDomain($app->config);
+        $this->app->bind(ValueDomain::class, function ($app) {
+            return new ValueDomain($app->config, new Client());
         });
     }
 }

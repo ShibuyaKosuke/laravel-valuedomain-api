@@ -1,17 +1,19 @@
 <?php
 
-namespace ShibuyaKosuke\LaravelValuedomainApi\Traits;
+namespace ShibuyaKosuke\LaravelValuedomainApi\Functions\Domains;
 
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
+use ShibuyaKosuke\LaravelValuedomainApi\Functions\Base;
+use ShibuyaKosuke\LaravelValuedomainApi\Services\Http;
 
-trait Dns
+class Dns extends Base
 {
     /**
      * @return array
      * @throws GuzzleException
      */
-    public function getDnses(): array
+    public function all(): array
     {
         $results = [];
         $currentPage = 1;
@@ -30,7 +32,7 @@ trait Dns
      * @return array
      * @throws GuzzleException
      */
-    public function getDns(string $domain = null): array
+    public function get(string $domain = null): array
     {
         if (is_null($domain)) {
             $domain = $this->domain;
@@ -39,16 +41,19 @@ trait Dns
     }
 
     /**
-     * @param string $domain
+     * @param string|null $domain
      * @param string $records
      * @param integer $ttl
-     * @return mixed
+     * @return array
      * @throws GuzzleException
      */
-    public function updateDns(string $domain, string $records, int $ttl = 1200): mixed
+    public function update(string $domain = null, string $records = '', int $ttl = 1200): array
     {
+        if (is_null($domain)) {
+            $domain = $this->domain;
+        }
         return $this->http->put("domains/{$domain}/dns", [
-            'domain' => $domain,
+            'ns_type' => 'valuedomain1',
             'records' => $records,
             'ttl' => $ttl,
         ]);

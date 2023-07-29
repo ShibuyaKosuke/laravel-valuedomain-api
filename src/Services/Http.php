@@ -3,7 +3,9 @@
 namespace ShibuyaKosuke\LaravelValuedomainApi\Services;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Config\Repository;
+use Illuminate\Support\Arr;
 
 class Http
 {
@@ -30,12 +32,55 @@ class Http
     }
 
     /**
+     * @return string
+     */
+    public function setHeaderAuthorization(): string
+    {
+        return 'Bearer ' . $this->apiKey;
+    }
+
+    /**
+     * @return string
+     */
+    public function setHeaderAccept(): string
+    {
+        return 'application/json';
+    }
+
+    /**
+     * @return string
+     */
+    public function setHeaderContentType(): string
+    {
+        return 'application/x-www-form-urlencoded';
+    }
+
+    /**
+     * @param string $endpoint
+     * @return array
+     * @throws GuzzleException
+     */
+    public function getAll(string $endpoint): array
+    {
+        $results = [];
+        $currentPage = 1;
+
+        do {
+            $response = $this->get($endpoint, ['page' => $currentPage]);
+            $results += Arr::get($response, 'results', []);
+            $currentPage++;
+        } while ($currentPage <= Arr::get($response, 'paging.page'));
+
+        return $results;
+    }
+
+    /**
      * @param string $endpoint
      * @param array $params
-     * @return mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return array
+     * @throws GuzzleException
      */
-    public function get(string $endpoint, array $params = [])
+    public function get(string $endpoint, array $params = []): array
     {
         $url = self::API_URL . $endpoint;
         if (count($params)) {
@@ -44,8 +89,8 @@ class Http
 
         $response = $this->client->get($url, [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Accept' => 'application/json',
+                'Authorization' => $this->setHeaderAuthorization(),
+                'Accept' => $this->setHeaderAccept(),
             ],
             'timeout' => 120,
             'verify' => true,
@@ -58,23 +103,22 @@ class Http
     /**
      * @param string $endpoint
      * @param array $data
-     * @return mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return array
+     * @throws GuzzleException
      */
-    public function post(string $endpoint, array $data = [])
+    public function post(string $endpoint, array $data = []): array
     {
         $url = self::API_URL . $endpoint;
-
-        $post_query = json_encode($data);
 
         $response = $this->client->post($url, [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Accept' => 'application/json',
+                'Authorization' => $this->setHeaderAuthorization(),
+                'Accept' => $this->setHeaderAccept(),
+                'Content-Type' => $this->setHeaderContentType()
             ],
             'timeout' => 120,
             'verify' => true,
-            'body' => $post_query
+            'form_params' => $data
         ]);
 
         $body = $response->getBody();
@@ -84,23 +128,22 @@ class Http
     /**
      * @param string $endpoint
      * @param array $data
-     * @return mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return array
+     * @throws GuzzleException
      */
-    public function put(string $endpoint, array $data = [])
+    public function put(string $endpoint, array $data = []): array
     {
         $url = self::API_URL . $endpoint;
-
-        $post_query = json_encode($data);
 
         $response = $this->client->put($url, [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Accept' => 'application/json',
+                'Authorization' => $this->setHeaderAuthorization(),
+                'Accept' => $this->setHeaderAccept(),
+                'Content-Type' => $this->setHeaderContentType()
             ],
             'timeout' => 120,
             'verify' => true,
-            'body' => $post_query
+            'form_params' => $data
         ]);
 
         $body = $response->getBody();
@@ -110,23 +153,22 @@ class Http
     /**
      * @param string $endpoint
      * @param array $data
-     * @return mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return array
+     * @throws GuzzleException
      */
-    public function delete(string $endpoint, array $data = [])
+    public function delete(string $endpoint, array $data = []): array
     {
         $url = self::API_URL . $endpoint;
 
-        $post_query = json_encode($data);
-
         $response = $this->client->delete($url, [
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Accept' => 'application/json',
+                'Authorization' => $this->setHeaderAuthorization(),
+                'Accept' => $this->setHeaderAccept(),
+                'Content-Type' => $this->setHeaderContentType()
             ],
             'timeout' => 120,
             'verify' => true,
-            'body' => $post_query
+            'form_params' => $data
         ]);
 
         $body = $response->getBody();

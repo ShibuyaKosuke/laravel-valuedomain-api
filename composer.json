@@ -40,7 +40,7 @@
                 "ShibuyaKosuke\\LaravelValuedomainApi\\Providers\\ServiceProvider"
             ],
             "aliases": {
-                "ValueDomain": "ShibuyaKosuke\\LaravelValuedomainApi\\Facades\\ValueDomain",
+                "ValueDomain": "ShibuyaKosuke\\LaravelValuedomainApi\\Facades\\ValueDomain"
             }
         }
     },
