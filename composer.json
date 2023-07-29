@@ -1,0 +1,64 @@
+{
+    "name": "shibuyakosuke/laravel-valuedomain-api",
+    "description": "Manage Value domain api for Laravel",
+    "keywords": [
+        "laravel",
+        "jetstream",
+        "adminlte",
+        "admin",
+        "administrator",
+        "livewire"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "ShibuyaKosuke\\LaravelValuedomainApi\\": "src/",
+            "ShibuyaKosuke\\LaravelValuedomainApi\\Test\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "ShibuyaKosuke",
+            "email": "github@shibuyakosuke.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "laravel/framework": ">=8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0",
+        "orchestra/testbench": "^6.21",
+        "squizlabs/php_codesniffer": "^3.6",
+        "nunomaduro/collision": "^5.10",
+        "brianium/paratest": "^6.3"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ShibuyaKosuke\\LaravelValuedomainApi\\Providers\\ServiceProvider"
+            ],
+            "aliases": {
+                "ValueDomain": "ShibuyaKosuke\\LaravelValuedomainApi\\Facades\\ValueDomain",
+            }
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@php ./vendor/bin/testbench package:discover --ansi"
+        ],
+        "cs": [
+            "./vendor/bin/phpcs --standard=phpcs.xml ./"
+        ],
+        "cbf": [
+            "./vendor/bin/phpcbf --standard=phpcs.xml ./"
+        ],
+        "test": [
+            "./vendor/bin/phpunit"
+        ],
+        "paratest": [
+            "./vendor/bin/testbench package:test --parallel"
+        ]
+    }
+}
