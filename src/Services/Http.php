@@ -9,8 +9,6 @@ use Illuminate\Support\Arr;
 
 class Http
 {
-    public const API_URL = 'https://api.value-domain.com/v1/';
-
     /**
      * @var Client
      */
@@ -22,6 +20,11 @@ class Http
     private string $apiKey;
 
     /**
+     * @var string
+     */
+    private string $base_url;
+
+    /**
      * @param Client $client
      * @param Repository $repository
      */
@@ -29,6 +32,7 @@ class Http
     {
         $this->client = $client;
         $this->apiKey = $repository->get('valuedomain.api_key');
+        $this->base_url = $repository->get('valuedomain.base_url');
     }
 
     /**
@@ -67,11 +71,32 @@ class Http
 
         do {
             $response = $this->get($endpoint, ['page' => $currentPage]);
-            $results += Arr::get($response, 'results', []);
+
+            /** @noinspection SlowArrayOperationsInLoopInspection */
+            $results = array_merge($results, $response['results'], []);
             $currentPage++;
-        } while ($currentPage <= Arr::get($response, 'paging.page'));
+
+            $max = Arr::get($response, 'paging.max');
+            $limit = Arr::get($response, 'paging.limit');
+            $total = ceil($max / $limit);
+        } while ($currentPage <= $total);
 
         return $results;
+    }
+
+    /**
+     * @param string $endpoint
+     * @return string
+     */
+    private function getUrl(string $endpoint): string
+    {
+        return collect()
+            ->push($this->base_url)
+            ->push($endpoint)
+            ->map(function ($item) {
+                return trim($item, '/');
+            })
+            ->implode('/');
     }
 
     /**
@@ -82,7 +107,7 @@ class Http
      */
     public function get(string $endpoint, array $params = []): array
     {
-        $url = self::API_URL . $endpoint;
+        $url = $this->getUrl($endpoint);
         if (count($params)) {
             $url .= '?' . http_build_query($params);
         }
@@ -108,9 +133,7 @@ class Http
      */
     public function post(string $endpoint, array $data = []): array
     {
-        $url = self::API_URL . $endpoint;
-
-        $response = $this->client->post($url, [
+        $response = $this->client->post($this->getUrl($endpoint), [
             'headers' => [
                 'Authorization' => $this->setHeaderAuthorization(),
                 'Accept' => $this->setHeaderAccept(),
@@ -133,9 +156,7 @@ class Http
      */
     public function put(string $endpoint, array $data = []): array
     {
-        $url = self::API_URL . $endpoint;
-
-        $response = $this->client->put($url, [
+        $response = $this->client->put($this->getUrl($endpoint), [
             'headers' => [
                 'Authorization' => $this->setHeaderAuthorization(),
                 'Accept' => $this->setHeaderAccept(),
@@ -158,9 +179,7 @@ class Http
      */
     public function delete(string $endpoint, array $data = []): array
     {
-        $url = self::API_URL . $endpoint;
-
-        $response = $this->client->delete($url, [
+        $response = $this->client->delete($this->getUrl($endpoint), [
             'headers' => [
                 'Authorization' => $this->setHeaderAuthorization(),
                 'Accept' => $this->setHeaderAccept(),
